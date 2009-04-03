@@ -1,0 +1,273 @@
+GeographyDivisionSelect
+=======================
+
+---------------------------------------------------------------
+				Description
+----------------------------------------------------------------
+
+Geography Division Select is a select tag which helps developers to display all divisions of the World. 
+This plugin is similar to the country_select and state_select plugins and includes both mechanisms. 
+
+Using Geography Division Select a user can
+1. List all the Regions (Continents) of the world (based on conditions)
+2. List all the Countries of the world (based on conditions)
+3. List all the States/Provinces/Districts...etc., for Each(or more) Country(ies)(based on conditions)
+
+The advantage of using geography_division_select is that you can provide :only or :exclude conditions for each type of drilldown and get more options.
+
+Geography Division Select can be used by 2 methods
+
+1. geography_division_select :- This is a general select option
+2. geography_division_options_for_select :- This provides only the options for the select which can be wrapped around a HTML Select tag.
+
+---------------------------------------------------------------
+				Installation
+----------------------------------------------------------------
+
+Install
+ * Run the following command:
+   go to vendors/plugins folder and run the following command
+   git clone git://github.com/heurionconsulting/geography_division_select.git
+ 
+
+---------------------------------------------------------------
+				Usage
+----------------------------------------------------------------
+
+Geography Division select can be used in 2 methods
+
+1. Select tag which generates the HTML SELECT and OPTION TAGS
+
+geography_division_select(object,method,options,html_options)
+
+2. Select tag which generates just OPTION TAGS which can be wrapped around a HTML SELECT TAG
+
+geography_division_options_for_select(options)
+
+The main entity that controls the display of geography_division_select is the options section. The main supporting elements are
+
+:drilldown -- This keyword identifies the type of data to be shown as part of dropdown. Supporting types of drilldown are
+	:drilldown=>"region" -- displays the regions (continents) of the world based on conditions. This is the default type of drilldown
+	:drilldown=>"country" -- displays the countries of the world based on conditions
+	:drilldown="state" -- displays the states/provinces/atolls/islands,etc., of a country(ies) based on conditions
+
+:selected -- This keyword identifies which option in the dropdown has to be preselected.
+
+:priority -- This keyword identifies if there is any priority selection that has to be provided along with the complete list. 
+This helps if the developer wants to ensure priority for a particular country/state/region.
+
+:only -- This keyword provides support to identify conditions for the drilldown to provide display of that particular or set of drilldown elements.
+Only Conditions has to be used in conjunction of the drilldown type to identify better selection of drilldown data.
+
+:exclude -- This keyword provides support to exclude a list of options while creating the dropdown options. Just like :only conditions, :exclude conditons
+can be used in conjunction of the drilldown types to allow better selection of drilldown data.
+
+
+NOTE:  
+
+1. :only and :exclude conditions can have multiple drilldowns as part of the conditions. It helps in making correct query of options that are displayed 
+
+e.g. 	a. :only=>{:country=>"United States Of America",:region=>"North America"} 
+	b. :exclude=>{:country=>"India", :state=>"Karnataka"}
+
+2. For any select tag both :only and :exclude can be used together.
+
+e.g. {:only=>{:region=>"Asia",:country=>"India"},:exclude{:state=>"Karnataka"}}
+
+3. Any conditions either in :only or :exclude you can use multiple elements (separated by comma)
+
+e.g. 	a. :only=>{:country=>"India,United States of America, United Kingdom,France,Spain"}
+	b. :exclude=>{:region=>"Africa,Asia,North America"}
+	c. :only=>{:region=>"Asia,Africa,North America"},:exclude=>{:country=>"India,United States Of America,South Africa"}
+
+4. By using Only conditions care has to be taken to ensure that the parent of the drilldown would be neglected. The various options are
+	a. only has region drilldown -- both country and state are considered if they are part of :exclude condition
+	b. only has country drilldown -- only state is considered if it is part of :exclude condition. if region is part of :only or :exclude condition it is not considered for calculation of states
+	c. only has state drilldown -- only the state is considered. If region or country is part of :only or :exclude condition, they are neglected for calculation of list of states
+
+e.g. 	a. :only=>{:region=>"Asia"},:exclude=>{:country=>"India",:state=>"Karnataka"} -- Valid
+     	b. :only=>{:country=>"India"},:exclude=>{:region="North America"} -- same as :only=>{:country=>"India"}
+    	c. :only=>{:region=>"Asia",:country=>"India"} -- same as :only=>{:country=>"India"}
+	d. :only=>{:state=>"Washington"},:exclude=>{:region=>"Asia"} -- same as :only=>{:state=>"Washington"}
+	e. :only=>{:state=>"Washington"},:exclude=>{:region=>"Asia",:country=>"United States of America"} -- same as :only=>{:state=>"Washington"}
+	e. :only=>{:country=>"United States of America",:state=>"Washington"},:exclude=>{:region=>"Asia"}-- same as :only=>{:state=>"Washington"}
+	f. :only=>{:region=>"North America",:state=>"New York"},:exclude=>{:country=>"United States of America"}-- same as :only=>{:state=>"New York"}
+	g. :only=>{:region=>"North America",:country=>"United States of America",:state=>"New York"} -- same as :only=>{:state=>"New York"}
+
+
+
+---------------------------------------------------------------
+				EXAMPLES
+----------------------------------------------------------------
+
+<p>
+=================================================================================<br/>
+You can just copy and paste all these examples in a view (rhtml or html.erb file) to get a better understanding of the options <br/>
+==================================================================================
+</p>
+
+<p>Examples using geography_division_select tag<br/>
+============================================
+
+<p>Example 1: Default Entity
+<%= geography_division_select("geography","geography") %></p>
+Displays all the 7 regionsof the world
+
+<p>Example 2: Region DrillDown
+<%= geography_division_select("geography","geography",:drilldown=>"region") %></p>
+Displays all the 7 regions of the world
+
+<p>Example 3: Region Drilldown using Region Only Conditions
+<%= geography_division_select("geography","geography",:drilldown=>"region",:only=>{:region=>"Europe,North America,South America"}) %></p>
+Displays the 3 regions as set in the :only conditions
+
+<p>Example 4: Region Drilldown using Region Exclude Conditions
+<%= geography_division_select("geography","geography",:drilldown=>"country",:exclude=>{:region=>"North America,South America"}) %></p>
+Displays the all the regions of the world except regions declared in :exclude condition
+</p>
+
+<p>Examples using the normal select tag and geography_division_options_for_select <br/>
+==============================================================================
+
+<p>Example 5: Country Drilldown
+<%= select_tag("geography",geography_division_options_for_select(:drilldown=>"country")) %></p>
+Displays all the countries in the world
+
+<p>Example 6: Country Drilldown with Country Only Conditions
+<%= select_tag("geography",geography_division_options_for_select(:drilldown=>"country",:only=>{:country=>"India,United States of America,United Kingdom"})) %></p>
+Displays only the countries as listed in the :only conditions
+
+<p>Example 7: Country Drilldown with Country Exclude Conditions
+<%= select_tag("geography",geography_division_options_for_select(:drilldown=>"country",:exclude=>{:country=>"India,United States of America,United Kingdom"})) %></p>
+Displays all the countries in the world except the ones listed in the :exclude conditions
+
+<p>Example 8: Country Type Region Only Conditions
+<%= select_tag("geography",geography_division_options_for_select(:drilldown=>"country",:only=>{:region=>"Asia,Europe"})) %></p>
+Displays all the countries in the Asia and Europe Region.
+
+</p>
+<p>Examples using the geography_division_select as part of the form tag<br/>
+=====================================================================
+
+<% form_for :user do |f| -%>
+
+<p><label for="region">Example 9: Country Drilldown using Region in Exclude Conditions</label><br/>
+<%= f.geography_division_select :geography,:drilldown=>"country",:exclude=>{:region=>"Asia,Europe"} %></p>
+Displays all the countries in the world except the countries in the asia and europe region
+
+<p><label for="region">Example 10: Country Drilldown using Region and Country in Only Conditions</label><br/>
+<%= f.geography_division_select("geography1", :drilldown=>"country",:only=>{:region=>"Asia,Europe",:country=>"India,UnitedKingdom,France,Indonesia"}) %>
+</p>
+Displays all the countries as available in the :only conditions
+
+<p><label for="region">Example 11: Country Drilldown using Region in Only and Country in Exclude Conditions</label><br/>
+<%= f.geography_division_select :geography2, :drilldown=>"country",:only=>{:region=>"Asia,Europe"},:exclude=>{:country=>"India,UnitedKingdom,France,Indonesia"} %></p>
+Displays all the countries in the Asia and Europe Region except the countries listed in the :exclude conditions
+
+<p><label for="country">Example 12: Country Drilldown using Region in Exclude and Country in Only Conditions</label><br/>
+<%= f.geography_division_select :geography3,:drilldown=>"country",:exclude=>{:region=>"Asia,South America"},:only=>{:country=>"India,Japan,South Africa"} %></p>
+Displays all the countries listed in the :only conditions
+
+<p><label for="country">Example 13: Country Drilldown using Region and Country in Exclude Conditions</label><br/>
+<%= f.geography_division_select :geography4,:drilldown=>"country",:exclude=>{:region=>"Asia,South America",:country=>"France,United States of America,United Kingdom"} %></p>
+Displays all the countries which are not part of Asia and South America regions and the countries listed in the :country exclude section.
+
+<p><%= submit_tag 'Submit' %></p>
+
+<% end -%>
+</p>
+
+<p>Examples using the HTML SELECT TAGS with options created using geography_division_options_for_select <br/>
+====================================================================================================
+
+<p>Example 14: State Drilldown using Country only State only Conditions
+<select name="geography">
+<%= geography_division_options_for_select(:drilldown=>"state",:only=>{:country=>"India",:state=>"Karnataka,Delhi,Himachal Pradesh"}) %></select>
+</p>
+Displays all the states listed in the state's only condition
+
+<p>Example 15: State Drilldown using Country in Only and State in Exclude Conditions
+<select name="geography">
+<%= geography_division_options_for_select(:drilldown=>"state",:only=>{:country=>"India"},:exclude=>{:state=>"Karnataka,Himachal Pradesh"}) %></select>
+</p>
+Displays all the states of India  country excluding the states listed in the :exclude conditions
+
+<p>Example 16: State Drilldown using Country in Exclude and State in Only Conditions
+<select name="geography">
+<%= geography_division_options_for_select(:drilldown=>"state",:exclude=>{:country=>"India"},:only=>{:state=>"Karnataka,Himachal Pradesh"}) %></select>
+</p>
+Displays all the states as listed in the Only conditions
+
+<p>Example 17: State Drilldown using Country in Only conditions
+<select name="geography">
+<%= geography_division_options_for_select(:drilldown=>"state",:only=>{:country=>"India"}) %></select>
+</p>
+Displays all the states of India
+
+<p>Example 18: State Drilldown using Country in Only conditions
+<select name="geography">
+<%= geography_division_options_for_select(:drilldown=>"state",:only=>{:country=>"India,United Kingdom"}) %></select>
+</p>
+Displays all the states of India and United Kingdom
+
+</p>
+
+<p>Examples using the Selected option<br/>
+====================================
+
+<p>Example 19: State Drilldown using Country in Only conditions and Selected
+<select name="geography">
+<%= geography_division_options_for_select(:drilldown=>"state",:only=>{:country=>"India,United Kingdom"},:selected=>"Greater London") %></select>
+</p>
+Displays all the states of India and United Kingdom with London being selected
+
+</p>
+
+<p>Examples using the priority option<br/>
+====================================
+
+<p>Example 20: Region Drilldown using prority regions
+<%= geography_division_select("geography","geography",:drilldown=>"region",:priority=>"Asia,North America,Europe") %></p>
+Displays all the 7 regions of the world with Asia, North America and Europe in the priority segment
+
+<p>Example 21: Country Drilldown using Priority items
+<%= geography_division_select("geography","geography",:drilldown=>"country",:priority=>"United States Of America,United Kingdom,India") %></p>
+Displays all the 239 countries of the world with USA, UK and India being in the priority list.
+</p>
+
+
+--------------------------------------------------------------------
+						Contributions
+---------------------------------------------------------------------
+
+1. Satish N Kota (Heurion Consutling) for programming the plugin
+2. Rajeshwari, Santhosh, Prabhakar for data collection and validation of all the necessary data to create regions, countries and most important states.
+3. Subhash Mohan for writing Examples
+4. Wikipedia.org -- for having provided all necessary data using which the complete plugin wouldn't have been successful.
+
+
+--------------------------------------------------------------------
+						Contact
+--------------------------------------------------------------------
+
+Any issues regarding bugs in plugin code or in the data/information can be brought to notice of Heurion Consulting
+
+email: info@heurionconsulting.com
+website: www.heurionconsulting.com
+blog: http://railsvoice.wordpress.com
+
+--------------------------------------------------------------------
+						Disclaimer
+---------------------------------------------------------------------
+
+The list of Regions, Countries, States/Provinces/Districts/Atolls/Islands, etc., are based on informatoin collected in the internet.
+We are thankful to various sites  especially to Wikipedia.org for having provided the information. All the data provided have been converted into
+pure english alphabet format and special characters are converted to its nearest english alphabet. The authors have tried their level best to provide 
+adequate and correct information based on the analysis and takes no responsiibility if so ever if any information is incorrect or is in form that 
+offend any users. The authors acknowledges if any error is brought to notice and shall make necessary changes. Please review the data carefully before you use it
+
+---------------------------------------------------------------------
+						License
+---------------------------------------------------------------------
+
+Refer to MIT License file
